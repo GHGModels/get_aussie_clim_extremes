@@ -19,5 +19,6 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
+int is_leap_year(int);
 
 #endif /* GET_LT_AUSSIE_TMAX_H */
