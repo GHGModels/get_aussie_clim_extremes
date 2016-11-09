@@ -21,9 +21,6 @@ int main() {
 
     int   jj, d, r, c, x, y, status, nc_id, var_id, yr, mth, ndays, days_in_mth;
     int   mth_id, day;
-    int   ntime = 1;
-    int   nlats = 3474;
-    int   nlons = 4110;
     int   window = 5;
     long  offset;
     int   summer_mths[] = {12, 1, 2};
@@ -33,9 +30,17 @@ int main() {
     char  iday[3];
     char  infname[STRING_LENGTH];
     char  fdir[STRING_LENGTH];
-
+    char  var_name[STRING_LENGTH];
 
     //static float data_out[NLAT][NLON];
+
+    // Need to be declared like this otherwise the netcdf read will attempt to
+    // use the heap to allocate memory and run out, rather than the stack
+    // I'm sure there is a way to get netcdf to read into a 1D array but I
+    // don't know how to do that and can't find a quick example
+    // NB. I'm declaring 1 extra spot for leap years, so we will need to make
+    // sure when we read from this array we are checking leap years.
+    static float data_in[MAX_DAYS][NLAT][NLON];
 
     float  max_5day_sum, sum;
 
@@ -43,6 +48,7 @@ int main() {
     data_out = calloc(NLAT*NLON, sizeof(float));
 
     strcpy(fdir, "/Users/mdekauwe/Downloads/emast_data");
+    strcpy(var_name, "air_temperature");
 
     for (yr = 1970; yr < 1971; yr++) {
         printf("%d\n", yr);
@@ -94,6 +100,27 @@ int main() {
                             fdir, yr+1, imth, iday);
                 }
 
+                // For now just read the same file again and again!
+                sprintf(infname,
+                        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc", fdir);
+
+                if ((status = nc_open(infname, NC_NOWRITE, &nc_id))) {
+                    ERR(status);
+                }
+
+                if ((status = nc_inq_varid(nc_id, var_name, &var_id))) {
+                    ERR(status);
+                }
+
+                if ((status = nc_get_var_float(nc_id, var_id,
+                                               &data_in[day-1][0][0]))) {
+                    ERR(status);
+                }
+
+                if ((status = nc_close(nc_id))) {
+                    ERR(status);
+                }
+
                 printf("%s\n", infname);
 
             }  // Day in month loop
@@ -107,6 +134,12 @@ int main() {
 
 
     } // yr loop
+
+    //for (r = 0; r < NLAT; r++) {
+    //    for (c = 0; c < NLON; c++) {
+    //        printf("%lf\n", data_in[15][r][c]);
+    //    }
+    //}
 
     return(EXIT_SUCCESS);
 

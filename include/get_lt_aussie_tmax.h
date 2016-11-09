@@ -7,12 +7,12 @@
 #include <strings.h>
 #include <string.h>
 
-#define FILE_NAME "eMAST_ANUClimate_day_tmax_v1m0_20000101.nc"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define NTIM 1
 #define NLAT 3474
 #define NLON 4110
+#define MAX_DAYS 91
 
 #define STRING_LENGTH 2000
 #define TRUE 1
