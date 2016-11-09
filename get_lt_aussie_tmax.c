@@ -20,7 +20,7 @@
 int main() {
 
     int   jj, d, r, c, x, y, status, nc_id, var_id, yr, mth, ndays, days_in_mth;
-    int   day;
+    int   mth_id, day;
     int   ntime = 1;
     int   nlats = 3474;
     int   nlons = 4110;
@@ -48,16 +48,16 @@ int main() {
         printf("%d\n", yr);
 
         ndays = 0;
-        for(mth = 0; mth < nmonths; mth++) {
+        for(mth_id = 0; mth_id < nmonths; mth_id++) {
 
             // Dec, Jan Feb?
-            if (mth == 0) {
+            if (mth_id == 0) {
                 ndays += 31;
                 days_in_mth = 31;
-            } else if (mth == 1) {
+            } else if (mth_id == 1) {
                 ndays += 31;
                 days_in_mth = 31;
-            } else if (mth == 2) {
+            } else if (mth_id == 2) {
                 if (is_leap_year(yr+1)) {
                     ndays += 29;
                     days_in_mth = 29;
@@ -69,17 +69,22 @@ int main() {
 
             for (day = 1; day <= days_in_mth; day++) {
 
-                if (day < 10)
+                if (day < 10) {
 	                sprintf(iday, "0%d", day);
-	            else
+	            } else {
 	                sprintf(iday, "%d", day);
+                }
 
-	            if (mth < 10)
-	                sprintf(imth, "0%d", mth);
-	            else
-	                sprintf(imth, "%d", mth);
+                if (mth_id == 0) {
+                    sprintf(imth, "12");
+                } else if (mth_id == 1) {
+                    sprintf(imth, "01");
+                } else if (mth_id == 2) {
+                    sprintf(imth, "02");
+                }
 
-                if (mth == 12) {
+
+                if (mth_id == 0) {
                     sprintf(infname,
                             "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
                             fdir, yr, imth, iday);
