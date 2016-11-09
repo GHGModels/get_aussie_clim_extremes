@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
+#include <strings.h>
+#include <string.h>
 
 #define FILE_NAME "eMAST_ANUClimate_day_tmax_v1m0_20000101.nc"
 #define ERRCODE 2
