@@ -33,6 +33,8 @@ typedef struct  {
 
 void clparser(int, char **, control *);
 int  is_leap_year(int);
+void read_nc_file_into_array(control *, char *, int,
+                             float nc_in[MAX_DAYS][NLAT][NLON]);
 void write_nc_file(char *,  float [NLAT][NLON]);
 
 #endif /* GET_LT_AUSSIE_TMAX_H */

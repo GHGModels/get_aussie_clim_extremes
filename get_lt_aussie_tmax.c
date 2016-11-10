@@ -131,22 +131,7 @@ int main(int argc, char **argv) {
                         "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc",
                         c->fdir);
 
-                if ((status = nc_open(infname, NC_NOWRITE, &nc_id))) {
-                    ERR(status);
-                }
-
-                if ((status = nc_inq_varid(nc_id, c->var_name, &var_id))) {
-                    ERR(status);
-                }
-
-                if ((status = nc_get_var_float(nc_id, var_id,
-                                               &data_in[nday_idx][0][0]))) {
-                    ERR(status);
-                }
-
-                if ((status = nc_close(nc_id))) {
-                    ERR(status);
-                }
+                read_nc_file_into_array(c, infname, nday_idx, data_in);
 
                 nday_idx++;
                 //printf("%s\n", infname);
@@ -271,6 +256,31 @@ void clparser(int argc, char **argv, control *c) {
         }
     }
 	return;
+}
+
+void read_nc_file_into_array(control *c, char *infname, int day_idx,
+                 float nc_in[MAX_DAYS][NLAT][NLON]) {
+
+    int  status, nc_id, var_id;
+
+    if ((status = nc_open(infname, NC_NOWRITE, &nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_inq_varid(nc_id, c->var_name, &var_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_get_var_float(nc_id, var_id,
+                                   &nc_in[day_idx][0][0]))) {
+        ERR(status);
+    }
+
+    if ((status = nc_close(nc_id))) {
+        ERR(status);
+    }
+
+    return;
 }
 
 void write_nc_file(char *ofname, float out[NLAT][NLON]) {
