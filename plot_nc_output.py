@@ -20,11 +20,11 @@ from datetime import datetime, timedelta
 
 def main():
 
-    #fn = "test1.nc"
-    fn = "/Users/mdekauwe/Downloads/emast_data/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc"
+    fn = "test1.nc"
+    #fn = "/Users/mdekauwe/Downloads/emast_data/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc"
     f = nc.Dataset(fn)
-    #data = f.variables['Tmax'][:,:]
-    data = f.variables['air_temperature'][:,:]
+    data = f.variables['Tmax'][:,:]
+    #data = f.variables['air_temperature'][0,:,:]
 
     plt.imshow(data)
     plt.colorbar()
