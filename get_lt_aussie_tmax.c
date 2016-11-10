@@ -251,10 +251,10 @@ void clparser(int argc, char **argv, control *c) {
                 fprintf(stderr,"%s: unknown argument on command line: %s\n",
                         argv[0], argv[i]);
                 exit(EXIT_FAILURE);
-     		}
+            }
         }
     }
-	return;
+    return;
 }
 
 void read_nc_file_into_array(control *c, char *infname, int day_idx,
