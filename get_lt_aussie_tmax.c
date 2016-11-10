@@ -246,11 +246,11 @@ void clparser(int argc, char **argv, control *c) {
             } else if (!strncasecmp(argv[i], "-sy", 3)) {
                 c->start_yr = atoi(argv[++i]);
             } else if (!strncasecmp(argv[i], "-ey", 3)) {
-			    c->end_yr = atoi(argv[++i]);
-			} else {
+                c->end_yr = atoi(argv[++i]);
+            } else {
                 fprintf(stderr,"%s: unknown argument on command line: %s\n",
                         argv[0], argv[i]);
-				exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
      		}
         }
     }
