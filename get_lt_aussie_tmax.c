@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
     int   jj, rr, cc, status, nc_id, var_id, yr, ndays, days_in_mth;
     int   mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
-    int   start_yr = 1970, end_yr = 1971, x_dimid, y_dimid;
+    int   start_yr = 1970, end_yr = 1980, x_dimid, y_dimid;
     int   dimids[NDIMS];
     long  offset;
     char  imth[3];
@@ -251,7 +251,6 @@ int main(int argc, char **argv) {
     if ((status = nc_close(nc_id))) {
         ERR(status);
     }
-
 
     sprintf(ofname2, "test2.nc");
 
