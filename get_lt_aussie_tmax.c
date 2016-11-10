@@ -253,6 +253,39 @@ int main(int argc, char **argv) {
     }
 
 
+    sprintf(ofname2, "test2.nc");
+
+    if ((status = nc_create(ofname2, NC_CLOBBER, &nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "x", NLON, &x_dimid))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "y", NLAT, &y_dimid))) {
+        ERR(status);
+    }
+
+    dimids[0] = y_dimid;
+    dimids[1] = x_dimid;
+
+    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS, dimids, &var_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_enddef(nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_put_var_float(nc_id, var_id, &nc_data_out1[0][0]))) {
+        ERR(status);
+    }
+
+    if ((status = nc_close(nc_id))) {
+        ERR(status);
+    }
+
 
     free(data_out);
     free(data_out2);
