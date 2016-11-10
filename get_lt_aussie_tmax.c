@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     strcpy(c->var_name, "air_temperature");
     c->window = 5;
     c->start_yr = 1970;
-    c->end_yr = 1980;
+    c->end_yr = 1971;
 
     clparser(argc, argv, c);
 
@@ -222,71 +222,10 @@ int main(int argc, char **argv) {
     }
 
     sprintf(ofname1, "test1.nc");
-
-    if ((status = nc_create(ofname1, NC_CLOBBER, &nc_id))) {
-        ERR(status);
-    }
-
-    if ((status = nc_def_dim(nc_id, "x", NLON, &x_dimid))) {
-        ERR(status);
-    }
-
-    if ((status = nc_def_dim(nc_id, "y", NLAT, &y_dimid))) {
-        ERR(status);
-    }
-
-    dimids[0] = y_dimid;
-    dimids[1] = x_dimid;
-
-    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS, dimids, &var_id))) {
-        ERR(status);
-    }
-
-    if ((status = nc_enddef(nc_id))) {
-        ERR(status);
-    }
-
-    if ((status = nc_put_var_float(nc_id, var_id, &nc_data_out1[0][0]))) {
-        ERR(status);
-    }
-
-    if ((status = nc_close(nc_id))) {
-        ERR(status);
-    }
+    write_nc_file(ofname1, nc_data_out1);
 
     sprintf(ofname2, "test2.nc");
-
-    if ((status = nc_create(ofname2, NC_CLOBBER, &nc_id))) {
-        ERR(status);
-    }
-
-    if ((status = nc_def_dim(nc_id, "x", NLON, &x_dimid))) {
-        ERR(status);
-    }
-
-    if ((status = nc_def_dim(nc_id, "y", NLAT, &y_dimid))) {
-        ERR(status);
-    }
-
-    dimids[0] = y_dimid;
-    dimids[1] = x_dimid;
-
-    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS, dimids, &var_id))) {
-        ERR(status);
-    }
-
-    if ((status = nc_enddef(nc_id))) {
-        ERR(status);
-    }
-
-    if ((status = nc_put_var_float(nc_id, var_id, &nc_data_out1[0][0]))) {
-        ERR(status);
-    }
-
-    if ((status = nc_close(nc_id))) {
-        ERR(status);
-    }
-
+    write_nc_file(ofname2, nc_data_out2);
 
     free(data_out);
     free(data_out2);
@@ -332,4 +271,45 @@ void clparser(int argc, char **argv, control *c) {
         }
     }
 	return;
+}
+
+void write_nc_file(char *ofname, float out[NLAT][NLON]) {
+
+    int  status, nc_id, var_id, nday_idx, yr_idx;
+    int  x_dimid, y_dimid;
+    int  dimids[NDIMS];
+
+    if ((status = nc_create(ofname, NC_CLOBBER, &nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "x", NLON, &x_dimid))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "y", NLAT, &y_dimid))) {
+        ERR(status);
+    }
+
+    dimids[0] = y_dimid;
+    dimids[1] = x_dimid;
+
+    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS,
+                             dimids, &var_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_enddef(nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_put_var_float(nc_id, var_id, &out[0][0]))) {
+        ERR(status);
+    }
+
+    if ((status = nc_close(nc_id))) {
+        ERR(status);
+    }
+
+    return;
 }
