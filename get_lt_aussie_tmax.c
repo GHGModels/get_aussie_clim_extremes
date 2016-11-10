@@ -19,16 +19,14 @@
 
 int main(int argc, char **argv) {
 
-    int   jj, d, rr, cc, x, y, status, nc_id, var_id, yr, mth, ndays, days_in_mth;
-    int   i, mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
-    int   start_yr = 1970, end_yr = 2012;
+    int   jj, rr, cc, status, nc_id, var_id, yr, ndays, days_in_mth;
+    int   mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
+    int   start_yr = 1970, end_yr = 1980;
 
     long  offset, offset2;
     char  imth[3];
     char  iday[3];
     char  infname[STRING_LENGTH];
-    char  fdir[STRING_LENGTH];
-    char  var_name[STRING_LENGTH];
 
     // Need to be declared like this otherwise the netcdf read will attempt to
     // use the heap to allocate memory and run out, rather than the stack
@@ -64,7 +62,7 @@ int main(int argc, char **argv) {
 
     yr_idx = 0;
     for (yr = start_yr; yr < end_yr; yr++) {
-        printf("%d\n", yr);
+        printf("%d %d\n", yr, yr_idx );
 
         ndays = 0;
         nday_idx = 0;
@@ -162,10 +160,10 @@ int main(int argc, char **argv) {
 
                 // Save running sum over all years so we can take the average
                 // later to calculate the max accross all years
-                offset = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
-                if (data_out[offset] > 0.0) {
-                    store_all_yrs[offset] += sum;
-                    store_cnt_all_yrs[offset]++;
+                offset2 = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
+                if (data_out[offset2] > 0.0) {
+                    store_all_yrs[offset2] += sum;
+                    store_cnt_all_yrs[offset2]++;
                 }
 
             } // end column loop
@@ -219,7 +217,7 @@ int main(int argc, char **argv) {
 int is_leap_year(int year) {
 
     int leap = FALSE;
-    if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0) {
+    if ((year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0)) {
         leap = TRUE;
     }
 

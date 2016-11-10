@@ -1,6 +1,6 @@
 ##############################################################################
 HOME     = /Users/mdekauwe
-CFLAGS   =  -O3 #-g -Wall #-O3 #-g -Wall
+CFLAGS   =  -g -Wall#-O3 #-g -Wall #-O3 #-g -Wall
 ARCH     =  x86_64
 INCLS    = -I./include
 LIBS     = -L/opt/local/lib -lm -lnetcdf
