@@ -21,6 +21,13 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
-int is_leap_year(int);
+typedef struct  {
+    char   fdir[STRING_LENGTH];
+    char   var_name[STRING_LENGTH];
+    int    window;
+} control;
+
+void clparser(int, char **, control *);
+int  is_leap_year(int);
 
 #endif /* GET_LT_AUSSIE_TMAX_H */

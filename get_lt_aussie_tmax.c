@@ -17,22 +17,16 @@
 
 #include "get_lt_aussie_tmax.h"
 
-int main() {
+int main(int argc, char **argv) {
 
-    int   jj, d, r, c, x, y, status, nc_id, var_id, yr, mth, ndays, days_in_mth;
-    int   mth_id, day;
-    int   window = 5;
+    int   jj, d, rr, cc, x, y, status, nc_id, var_id, yr, mth, ndays, days_in_mth;
+    int   i, mth_id, day, dd, nmonths = 3;
     long  offset;
-    int   summer_mths[] = {12, 1, 2};
-    int   nmonths = 3;
-    int   i = 0;
     char  imth[3];
     char  iday[3];
     char  infname[STRING_LENGTH];
     char  fdir[STRING_LENGTH];
     char  var_name[STRING_LENGTH];
-
-    //static float data_out[NLAT][NLON];
 
     // Need to be declared like this otherwise the netcdf read will attempt to
     // use the heap to allocate memory and run out, rather than the stack
@@ -41,14 +35,24 @@ int main() {
     // NB. I'm declaring 1 extra spot for leap years, so we will need to make
     // sure when we read from this array we are checking leap years.
     static float data_in[MAX_DAYS][NLAT][NLON];
+    float        max_5day_sum, sum;
+    float       *data_out = NULL;
 
-    float  max_5day_sum, sum;
+    control *c;
+    c = (control *)malloc(sizeof (control));
+	if (c == NULL) {
+		fprintf(stderr, "control structure: Not allocated enough memory!\n");
+		exit(EXIT_FAILURE);
+	}
 
-    float *data_out = NULL;
     data_out = calloc(NLAT*NLON, sizeof(float));
 
-    strcpy(fdir, "/Users/mdekauwe/Downloads/emast_data");
-    strcpy(var_name, "air_temperature");
+    // Initial assumptions, these can be changed on the cmd line
+    strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
+    strcpy(c->var_name, "air_temperature");
+    c->window = 5;
+
+    clparser(argc, argv, c);
 
     for (yr = 1970; yr < 1971; yr++) {
         printf("%d\n", yr);
@@ -93,22 +97,23 @@ int main() {
                 if (mth_id == 0) {
                     sprintf(infname,
                             "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
-                            fdir, yr, imth, iday);
+                            c->fdir, yr, imth, iday);
                 } else {
                     sprintf(infname,
                             "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
-                            fdir, yr+1, imth, iday);
+                            c->fdir, yr+1, imth, iday);
                 }
 
                 // For now just read the same file again and again!
                 sprintf(infname,
-                        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc", fdir);
+                        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc",
+                        c->fdir);
 
                 if ((status = nc_open(infname, NC_NOWRITE, &nc_id))) {
                     ERR(status);
                 }
 
-                if ((status = nc_inq_varid(nc_id, var_name, &var_id))) {
+                if ((status = nc_inq_varid(nc_id, c->var_name, &var_id))) {
                     ERR(status);
                 }
 
@@ -120,17 +125,28 @@ int main() {
                 if ((status = nc_close(nc_id))) {
                     ERR(status);
                 }
-
-                printf("%s\n", infname);
-
+                //printf("%s\n", infname);
             }  // Day in month loop
-
-            printf("%d\n", ndays);
-
-
-
-
         } // mth loop
+
+        // Calculate the maximum n-day Tmax sum across this years Australian
+        // summer for every pixel
+        for (rr = 0; rr < NLAT; rr++) {
+            for (cc = 0; cc < NLON; cc++) {
+                offset = rr * NLON + cc;
+                max_5day_sum = -9999;
+                for (dd = 0; dd < ndays - c->window; dd++) {
+                    sum = 0.0;
+                    for (jj = dd; jj < dd+c->window; jj++) {
+                        sum += data_in[jj][rr][cc];
+                    }
+                    if (sum > max_5day_sum) {
+                        data_out[offset] = sum;
+                    }
+                }
+            }
+        }
+
 
 
     } // yr loop
@@ -155,4 +171,26 @@ int is_leap_year(int year) {
 
     return (leap);
 
+}
+
+
+void clparser(int argc, char **argv, control *c) {
+	int i;
+
+	for (i = 1; i < argc; i++) {
+		if (*argv[i] == '-') {
+			if (!strncasecmp(argv[i], "-fd", 3)) {
+			    strcpy(c->fdir, argv[++i]);
+			} else if (!strncasecmp(argv[i], "-vn", 3)) {
+			    strcpy(c->var_name, argv[++i]);
+			} else if (!strncasecmp(argv[i], "-w", 2)) {
+			    c->window = atoi(argv[++i]);
+			} else {
+                fprintf(stderr,"%s: unknown argument on command line: %s\n",
+                        argv[0], argv[i]);
+				exit(EXIT_FAILURE);
+     		}
+        }
+    }
+	return;
 }
