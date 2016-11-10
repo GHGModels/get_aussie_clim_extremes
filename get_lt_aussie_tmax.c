@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
     int   jj, rr, cc, status, nc_id, var_id, yr, ndays, days_in_mth;
     int   mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
-    int   start_yr = 1970, end_yr = 1980, x_dimid, y_dimid;
+    int   x_dimid, y_dimid;
     int   dimids[NDIMS];
     long  offset;
     char  imth[3];
@@ -70,11 +70,13 @@ int main(int argc, char **argv) {
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
     strcpy(c->var_name, "air_temperature");
     c->window = 5;
+    c->start_yr = 1970;
+    c->end_yr = 1980;
 
     clparser(argc, argv, c);
 
     yr_idx = 0;
-    for (yr = start_yr; yr < end_yr; yr++) {
+    for (yr = c->start_yr; yr < c->end_yr; yr++) {
         printf("%d %d\n", yr, yr_idx);
 
         ndays = 0;
@@ -192,7 +194,7 @@ int main(int argc, char **argv) {
 
     // Figure out maximum for each pixel across all years
     yr_idx = 0;
-    for (yr = start_yr; yr < end_yr; yr++) {
+    for (yr = c->start_yr; yr < c->end_yr; yr++) {
         for (rr = 0; rr < NLAT; rr++) {
             for (cc = 0; cc < NLON; cc++) {
                 offset = rr * NLON + cc;
@@ -318,6 +320,10 @@ void clparser(int argc, char **argv, control *c) {
 			    strcpy(c->var_name, argv[++i]);
 			} else if (!strncasecmp(argv[i], "-w", 2)) {
 			    c->window = atoi(argv[++i]);
+            } else if (!strncasecmp(argv[i], "-sy", 3)) {
+			    c->start_yr = atoi(argv[++i]);
+            } else if (!strncasecmp(argv[i], "-ey", 3)) {
+			    c->end_yr = atoi(argv[++i]);
 			} else {
                 fprintf(stderr,"%s: unknown argument on command line: %s\n",
                         argv[0], argv[i]);

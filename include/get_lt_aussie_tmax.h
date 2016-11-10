@@ -27,6 +27,8 @@ typedef struct  {
     char   fdir[STRING_LENGTH];
     char   var_name[STRING_LENGTH];
     int    window;
+    int    start_yr;
+    int    end_yr;
 } control;
 
 void clparser(int, char **, control *);
