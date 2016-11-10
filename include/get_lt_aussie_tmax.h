@@ -13,6 +13,7 @@
 #define NLAT 3474
 #define NLON 4110
 #define MAX_DAYS 91
+#define NYRS 42
 
 #define STRING_LENGTH 2000
 #define TRUE 1

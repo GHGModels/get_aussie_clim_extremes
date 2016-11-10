@@ -20,8 +20,10 @@
 int main(int argc, char **argv) {
 
     int   jj, d, rr, cc, x, y, status, nc_id, var_id, yr, mth, ndays, days_in_mth;
-    int   i, mth_id, day, dd, nmonths = 3;
-    long  offset;
+    int   i, mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
+    int   start_yr = 1970, end_yr = 2012;
+
+    long  offset, offset2;
     char  imth[3];
     char  iday[3];
     char  infname[STRING_LENGTH];
@@ -35,8 +37,11 @@ int main(int argc, char **argv) {
     // NB. I'm declaring 1 extra spot for leap years, so we will need to make
     // sure when we read from this array we are checking leap years.
     static float data_in[MAX_DAYS][NLAT][NLON];
-    float        max_5day_sum, sum;
+    float        max_5day_sum, sum, value;
     float       *data_out = NULL;
+    float       *data_out2 = NULL;
+    float       *data_out_all_yrs = NULL;
+    int         *data_cnt_all_yrs = NULL;
 
     control *c;
     c = (control *)malloc(sizeof (control));
@@ -46,6 +51,9 @@ int main(int argc, char **argv) {
 	}
 
     data_out = calloc(NLAT*NLON, sizeof(float));
+    data_out2 = calloc(NLAT*NLON, sizeof(float));
+    data_out_all_yrs = calloc(NYRS*NLAT*NLON, sizeof(float));
+    data_cnt_all_yrs = calloc(NLAT*NLON, sizeof(int));
 
     // Initial assumptions, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
@@ -54,10 +62,12 @@ int main(int argc, char **argv) {
 
     clparser(argc, argv, c);
 
-    for (yr = 1970; yr < 1971; yr++) {
+    yr_idx = 0;
+    for (yr = start_yr; yr < end_yr; yr++) {
         printf("%d\n", yr);
 
         ndays = 0;
+        nday_idx = 0;
         for(mth_id = 0; mth_id < nmonths; mth_id++) {
 
             // Dec, Jan Feb?
@@ -93,7 +103,6 @@ int main(int argc, char **argv) {
                     sprintf(imth, "02");
                 }
 
-
                 if (mth_id == 0) {
                     sprintf(infname,
                             "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
@@ -118,13 +127,15 @@ int main(int argc, char **argv) {
                 }
 
                 if ((status = nc_get_var_float(nc_id, var_id,
-                                               &data_in[day-1][0][0]))) {
+                                               &data_in[nday_idx][0][0]))) {
                     ERR(status);
                 }
 
                 if ((status = nc_close(nc_id))) {
                     ERR(status);
                 }
+
+                nday_idx++;
                 //printf("%s\n", infname);
             }  // Day in month loop
         } // mth loop
@@ -134,28 +145,66 @@ int main(int argc, char **argv) {
         for (rr = 0; rr < NLAT; rr++) {
             for (cc = 0; cc < NLON; cc++) {
                 offset = rr * NLON + cc;
-                max_5day_sum = -9999;
-                for (dd = 0; dd < ndays - c->window; dd++) {
+                max_5day_sum = -9999.9;
+                for (dd = 0; dd < ndays - c->window; dd+=c->window) {
                     sum = 0.0;
                     for (jj = dd; jj < dd+c->window; jj++) {
-                        sum += data_in[jj][rr][cc];
+                        value = data_in[jj][rr][cc];
+                        // ignore masked values
+                        if (value > -9000.0) {
+                            sum += data_in[jj][rr][cc];
+                        }
                     }
                     if (sum > max_5day_sum) {
                         data_out[offset] = sum;
                     }
-                }
-            }
-        }
+                } // end day loop
 
+                // Save running sum over all years so we can take the average
+                // later to calculate the max accross all years
+                offset = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
+                if (data_out[offset] > 0.0) {
+                    data_out_all_yrs[offset] += sum;
+                    data_cnt_all_yrs[offset]++;
+                }
+
+            } // end column loop
+        } // end row loop
+
+        yr_idx++;
 
 
     } // yr loop
 
-    //for (r = 0; r < NLAT; r++) {
-    //    for (c = 0; c < NLON; c++) {
-    //        printf("%lf\n", data_in[15][r][c]);
+    offset = 2000 * NLON + 3000;
+    printf("%f\n", data_out[offset]);
+
+    // Check output
+    //for (rr = 0; rr < NLAT; rr++) {
+    //    for (cc = 0; cc < NLON; cc++) {
+    //        offset = rr * NLON + cc;
+    //        printf("%lf\n", data_out[offset]);
     //    }
     //}
+
+    // Figure out maximum for each pixel across all years
+    yr_idx = 0;
+    for (yr = start_yr; yr < end_yr; yr++) {
+        for (rr = 0; rr < NLAT; rr++) {
+            for (cc = 0; cc < NLON; cc++) {
+                offset = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
+                offset2 = rr * NLON + cc;
+                if (data_out_all_yrs[offset] > 0.0) {
+                    data_out2[offset2] = data_out_all_yrs[offset] / \
+                                        (float)data_cnt_all_yrs[offset];
+                }
+            }
+        }
+        yr_idx++;
+    }
+
+    offset = 2000 * NLON + 3000;
+    printf("%f\n", data_out2[offset]);
 
     return(EXIT_SUCCESS);
 
