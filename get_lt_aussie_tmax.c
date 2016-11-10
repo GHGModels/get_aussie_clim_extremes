@@ -134,13 +134,12 @@ int main(int argc, char **argv) {
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
 
                 nday_idx++;
-                //printf("%s\n", infname);
+                
             }  // Day in month loop
         } // mth loop
 
         // Calculate the maximum n-day Tmax sum across this years Australian
         // summer for every pixel
-        //printf("starting store loop\n");
         for (rr = 0; rr < NLAT; rr++) {
             //printf("%d : %d    %d\n", rr, NLAT, ndays);
             for (cc = 0; cc < NLON; cc++) {
