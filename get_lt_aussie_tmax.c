@@ -46,10 +46,10 @@ int main(int argc, char **argv) {
 
     control *c;
     c = (control *)malloc(sizeof (control));
-	if (c == NULL) {
-		fprintf(stderr, "control structure: Not allocated enough memory!\n");
-		exit(EXIT_FAILURE);
-	}
+    if (c == NULL) {
+        fprintf(stderr, "control structure: Not allocated enough memory!\n");
+        exit(EXIT_FAILURE);
+    }
 
     if ((data_out = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
         fprintf(stderr, "Error allocating space for data_out array\n");
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
 
                 nday_idx++;
-                
+
             }  // Day in month loop
         } // mth loop
 
