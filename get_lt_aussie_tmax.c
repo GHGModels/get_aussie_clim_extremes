@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
     float        max_5day_sum, sum, value;
     float       *data_out = NULL;
     float       *data_out2 = NULL;
-    float       *data_out_all_yrs = NULL;
-    int         *data_cnt_all_yrs = NULL;
+    float       *store_all_yrs = NULL;
+    int         *store_cnt_all_yrs = NULL;
 
     control *c;
     c = (control *)malloc(sizeof (control));
@@ -52,8 +52,8 @@ int main(int argc, char **argv) {
 
     data_out = calloc(NLAT*NLON, sizeof(float));
     data_out2 = calloc(NLAT*NLON, sizeof(float));
-    data_out_all_yrs = calloc(NYRS*NLAT*NLON, sizeof(float));
-    data_cnt_all_yrs = calloc(NLAT*NLON, sizeof(int));
+    store_all_yrs = calloc(NYRS*NLAT*NLON, sizeof(float));
+    store_cnt_all_yrs = calloc(NLAT*NLON, sizeof(int));
 
     // Initial assumptions, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
@@ -164,8 +164,8 @@ int main(int argc, char **argv) {
                 // later to calculate the max accross all years
                 offset = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
                 if (data_out[offset] > 0.0) {
-                    data_out_all_yrs[offset] += sum;
-                    data_cnt_all_yrs[offset]++;
+                    store_all_yrs[offset] += sum;
+                    store_cnt_all_yrs[offset]++;
                 }
 
             } // end column loop
@@ -194,9 +194,9 @@ int main(int argc, char **argv) {
             for (cc = 0; cc < NLON; cc++) {
                 offset = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
                 offset2 = rr * NLON + cc;
-                if (data_out_all_yrs[offset] > 0.0) {
-                    data_out2[offset2] = data_out_all_yrs[offset] / \
-                                        (float)data_cnt_all_yrs[offset];
+                if (store_all_yrs[offset] > 0.0) {
+                    data_out2[offset2] = store_all_yrs[offset] / \
+                                        (float)store_cnt_all_yrs[offset];
                 }
             }
         }
@@ -208,8 +208,8 @@ int main(int argc, char **argv) {
 
     free(data_out);
     free(data_out2);
-    free(data_out_all_yrs);
-    free(data_cnt_all_yrs);
+    free(store_all_yrs);
+    free(store_cnt_all_yrs);
 
     return(EXIT_SUCCESS);
 
