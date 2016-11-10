@@ -206,6 +206,11 @@ int main(int argc, char **argv) {
     offset = 2000 * NLON + 3000;
     printf("%f\n", data_out2[offset]);
 
+    free(data_out);
+    free(data_out2);
+    free(data_out_all_yrs);
+    free(data_cnt_all_yrs);
+
     return(EXIT_SUCCESS);
 
 }
