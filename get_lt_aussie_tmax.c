@@ -233,18 +233,18 @@ int is_leap_year(int year) {
 
 
 void clparser(int argc, char **argv, control *c) {
-	int i;
+    int i;
 
-	for (i = 1; i < argc; i++) {
-		if (*argv[i] == '-') {
-			if (!strncasecmp(argv[i], "-fd", 3)) {
-			    strcpy(c->fdir, argv[++i]);
-			} else if (!strncasecmp(argv[i], "-vn", 3)) {
-			    strcpy(c->var_name, argv[++i]);
-			} else if (!strncasecmp(argv[i], "-w", 2)) {
-			    c->window = atoi(argv[++i]);
+    for (i = 1; i < argc; i++) {
+        if (*argv[i] == '-') {
+            if (!strncasecmp(argv[i], "-fd", 3)) {
+                strcpy(c->fdir, argv[++i]);
+            } else if (!strncasecmp(argv[i], "-vn", 3)) {
+                strcpy(c->var_name, argv[++i]);
+            } else if (!strncasecmp(argv[i], "-w", 2)) {
+                c->window = atoi(argv[++i]);
             } else if (!strncasecmp(argv[i], "-sy", 3)) {
-			    c->start_yr = atoi(argv[++i]);
+                c->start_yr = atoi(argv[++i]);
             } else if (!strncasecmp(argv[i], "-ey", 3)) {
 			    c->end_yr = atoi(argv[++i]);
 			} else {
