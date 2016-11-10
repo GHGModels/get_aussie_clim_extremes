@@ -1,2 +1,5 @@
 get_lt_aussie_tmax
 *.o
+*.nc
+get_lt_aussie_tmax.dSYM
+get_lt_aussie_tmax.dSYM/*

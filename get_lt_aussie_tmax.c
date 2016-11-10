@@ -21,25 +21,28 @@ int main(int argc, char **argv) {
 
     int   jj, rr, cc, status, nc_id, var_id, yr, ndays, days_in_mth;
     int   mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
-    int   start_yr = 1970, end_yr = 1980;
-
-    long  offset, offset2;
+    int   start_yr = 1970, end_yr = 1971, x_dimid, y_dimid;
+    int   dimids[NDIMS];
+    long  offset;
     char  imth[3];
     char  iday[3];
     char  infname[STRING_LENGTH];
+    char  ofname1[STRING_LENGTH];
+    char  ofname2[STRING_LENGTH];
 
     // Need to be declared like this otherwise the netcdf read will attempt to
-    // use the heap to allocate memory and run out, rather than the stack
+    // use the heap rather than the stack to allocate memory and run out.
     // I'm sure there is a way to get netcdf to read into a 1D array but I
     // don't know how to do that and can't find a quick example
     // NB. I'm declaring 1 extra spot for leap years, so we will need to make
     // sure when we read from this array we are checking leap years.
     static float data_in[MAX_DAYS][NLAT][NLON];
+    static float nc_data_out1[NLAT][NLON];
+    static float nc_data_out2[NLAT][NLON];
     float        max_5day_sum, sum, value;
     float       *data_out = NULL;
     float       *data_out2 = NULL;
-    float       *store_all_yrs = NULL;
-    int         *store_cnt_all_yrs = NULL;
+    int         *cnt_all_yrs = NULL;
 
     control *c;
     c = (control *)malloc(sizeof (control));
@@ -48,12 +51,22 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-    data_out = calloc(NLAT*NLON, sizeof(float));
-    data_out2 = calloc(NLAT*NLON, sizeof(float));
-    store_all_yrs = calloc(NYRS*NLAT*NLON, sizeof(float));
-    store_cnt_all_yrs = calloc(NLAT*NLON, sizeof(int));
+    if ((data_out = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
+        fprintf(stderr, "Error allocating space for data_out array\n");
+        exit(EXIT_FAILURE);
+    }
 
-    // Initial assumptions, these can be changed on the cmd line
+    if ((data_out2 = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
+        fprintf(stderr, "Error allocating space for data_out2 array\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((cnt_all_yrs = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
+        fprintf(stderr, "Error allocating space for cnt_all_yrs array\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
     strcpy(c->var_name, "air_temperature");
     c->window = 5;
@@ -62,7 +75,7 @@ int main(int argc, char **argv) {
 
     yr_idx = 0;
     for (yr = start_yr; yr < end_yr; yr++) {
-        printf("%d %d\n", yr, yr_idx );
+        printf("%d %d\n", yr, yr_idx);
 
         ndays = 0;
         nday_idx = 0;
@@ -140,7 +153,9 @@ int main(int argc, char **argv) {
 
         // Calculate the maximum n-day Tmax sum across this years Australian
         // summer for every pixel
+        //printf("starting store loop\n");
         for (rr = 0; rr < NLAT; rr++) {
+            //printf("%d : %d    %d\n", rr, NLAT, ndays);
             for (cc = 0; cc < NLON; cc++) {
                 offset = rr * NLON + cc;
                 max_5day_sum = -9999.9;
@@ -160,10 +175,9 @@ int main(int argc, char **argv) {
 
                 // Save running sum over all years so we can take the average
                 // later to calculate the max accross all years
-                offset2 = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
-                if (data_out[offset2] > 0.0) {
-                    store_all_yrs[offset2] += sum;
-                    store_cnt_all_yrs[offset2]++;
+                if (data_out[offset] > 0.0) {
+                    data_out2[offset] += sum;
+                    cnt_all_yrs[offset]++;
                 }
 
             } // end column loop
@@ -171,30 +185,19 @@ int main(int argc, char **argv) {
 
         yr_idx++;
 
-
     } // yr loop
 
     offset = 2000 * NLON + 3000;
     printf("%f\n", data_out[offset]);
-
-    // Check output
-    //for (rr = 0; rr < NLAT; rr++) {
-    //    for (cc = 0; cc < NLON; cc++) {
-    //        offset = rr * NLON + cc;
-    //        printf("%lf\n", data_out[offset]);
-    //    }
-    //}
 
     // Figure out maximum for each pixel across all years
     yr_idx = 0;
     for (yr = start_yr; yr < end_yr; yr++) {
         for (rr = 0; rr < NLAT; rr++) {
             for (cc = 0; cc < NLON; cc++) {
-                offset = (yr_idx * NLAT * NLON) + (rr * NLON + cc);
-                offset2 = rr * NLON + cc;
-                if (store_all_yrs[offset] > 0.0) {
-                    data_out2[offset2] = store_all_yrs[offset] / \
-                                        (float)store_cnt_all_yrs[offset];
+                offset = rr * NLON + cc;
+                if (data_out2[offset] > 0.0) {
+                    data_out2[offset] /= (float)cnt_all_yrs[offset];
                 }
             }
         }
@@ -204,10 +207,87 @@ int main(int argc, char **argv) {
     offset = 2000 * NLON + 3000;
     printf("%f\n", data_out2[offset]);
 
+    // Write data to two netcdf files.
+
+    // Copy data into netcdf structured array. I'm sure i don't need to do this
+    // but I'm not sure how to pass 1D array to netcdf write! Pain for now
+    for (rr = 0; rr < NLAT; rr++) {
+        for (cc = 0; cc < NLON; cc++) {
+            offset = rr * NLON + cc;
+            nc_data_out1[rr][cc] = data_out[offset];
+            nc_data_out2[rr][cc] = data_out2[offset];
+        }
+    }
+
+    sprintf(ofname1, "test1.nc");
+
+    if ((status = nc_create(ofname1, NC_CLOBBER, &nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "x", NLON, &x_dimid))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "y", NLAT, &y_dimid))) {
+        ERR(status);
+    }
+
+    dimids[0] = x_dimid;
+    dimids[1] = y_dimid;
+
+    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS, dimids, &var_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_enddef(nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_put_var_float(nc_id, var_id, &nc_data_out1[0][0]))) {
+        ERR(status);
+    }
+
+    if ((status = nc_close(nc_id))) {
+        ERR(status);
+    }
+
+    sprintf(ofname2, "test2.nc");
+
+    if ((status = nc_create(ofname2, NC_CLOBBER, &nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "x", NLON, &x_dimid))) {
+        ERR(status);
+    }
+
+    if ((status = nc_def_dim(nc_id, "y", NLAT, &y_dimid))) {
+        ERR(status);
+    }
+
+    dimids[0] = x_dimid;
+    dimids[1] = y_dimid;
+
+    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS, dimids, &var_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_enddef(nc_id))) {
+        ERR(status);
+    }
+
+    if ((status = nc_put_var_float(nc_id, var_id, &nc_data_out2[0][0]))) {
+        ERR(status);
+    }
+
+    if ((status = nc_close(nc_id))) {
+        ERR(status);
+    }
+
     free(data_out);
     free(data_out2);
-    free(store_all_yrs);
-    free(store_cnt_all_yrs);
+    free(cnt_all_yrs);
 
     return(EXIT_SUCCESS);
 

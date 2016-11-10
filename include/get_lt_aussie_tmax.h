@@ -14,6 +14,7 @@
 #define NLON 4110
 #define MAX_DAYS 91
 #define NYRS 42
+#define NDIMS 2
 
 #define STRING_LENGTH 2000
 #define TRUE 1
