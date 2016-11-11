@@ -127,9 +127,9 @@ int main(int argc, char **argv) {
                 }
 
                 // For now just read the same file again and again!
-                sprintf(infname,
-                        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc",
-                        c->fdir);
+                //sprintf(infname,
+                //        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc",
+                //        c->fdir);
 
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
 
