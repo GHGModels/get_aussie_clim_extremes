@@ -1,7 +1,8 @@
 ##############################################################################
 USER    := $(shell whoami)
 HOME     = /Users/$(USER)
-WHERE    = $(HOME)/Desktop/emast_Tmax
+#WHERE    = $(HOME)/Desktop/emast_Tmax
+WHERE    = /Volumes/Seagate/emast_Tmax
 CFLAGS   =  -O3#-g -Wall
 ARCH     =  x86_64
 INCLS    = -I./include
