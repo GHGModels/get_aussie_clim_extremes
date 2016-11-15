@@ -183,6 +183,9 @@ void calculate_moving_sum(control *c, int ndays,
     long   offset;
     float  sum;
 
+    offset = 2000 * NLON + 3000;
+    printf("%f %f\n", data_out[offset], data_out2[offset]);
+
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
@@ -208,6 +211,10 @@ void calculate_moving_sum(control *c, int ndays,
         } // end column loop
     } // end row loop
 
+    offset = 2000 * NLON + 3000;
+    printf("%f %f\n", data_out[offset], data_out2[offset]);
+
+
     return;
 }
 
@@ -216,6 +223,9 @@ void calculate_tmax_average_over_all_years(control *c, float *data,
 
     int  yr, rr, cc;
     long offset;
+
+    offset = 2000 * NLON + 3000;
+    printf("%f %d %f\n", data_out[offset], count[offset], data_out[offset]/ (float)count[offset]);
 
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
         for (rr = 0; rr < NLAT; rr++) {
