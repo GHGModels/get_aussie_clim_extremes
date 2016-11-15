@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
     static float data_in[MAX_DAYS][NLAT][NLON];
     static float nc_data_out1[NLAT][NLON];
     static float nc_data_out2[NLAT][NLON];
-    float        max_5day_sum, sum, value;
     float       *data_out = NULL;
     float       *data_out2 = NULL;
     int         *cnt_all_yrs = NULL;
@@ -182,7 +181,7 @@ void calculate_moving_sum(control *c, int ndays,
 
     int    rr, cc, i, j;
     long   offset;
-    double max_5day_sum, sum;
+    float  sum;
 
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
