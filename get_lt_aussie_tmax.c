@@ -224,7 +224,8 @@ void calculate_tmax_average_over_all_years(control *c, float *data,
     long offset;
 
     offset = 2000 * NLON + 3000;
-    printf("%f %d %f\n", data_out[offset], count[offset], data_out[offset]/ (float)count[offset]);
+    printf("%f %d %f\n", data[offset], count[offset],
+           data[offset]/ (float)count[offset]);
 
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
         for (rr = 0; rr < NLAT; rr++) {
