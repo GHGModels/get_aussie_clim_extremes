@@ -180,7 +180,7 @@ void calculate_moving_sum(control *c, int ndays,
 
     int    rr, cc, i, j;
     long   offset;
-    float  sum;
+    float  sum, yr_max;
 
     //offset = 2000 * NLON + 3000;
     //printf("%f %f\n", data_out[offset], data_out2[offset]);
@@ -200,7 +200,6 @@ void calculate_moving_sum(control *c, int ndays,
                 if (sum > data_out[offset]) {
                     data_out[offset] = sum;
                 }
-
                 if (sum > yr_max) {
                     yr_max = sum;
                 }
