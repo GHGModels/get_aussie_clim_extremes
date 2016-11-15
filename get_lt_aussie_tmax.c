@@ -200,13 +200,7 @@ void calculate_moving_sum(control *c, int ndays,
                 sum = 0.0;
                 for (j = i; j < i + c->window; j++) {
 
-                    // ignore masked values
-                    //if (data_in[j][rr][cc] > -9000.0) {
-                    //    sum += data_in[j][rr][cc];
-                    //}
-
-                    // I think weird low values are getting through the filter
-                    // above. This is still a resonable assumption, i.e. Tmax>5
+                    // ignore masked values, weird low values
                     if (data_in[j][rr][cc] > 5.0) {
                         sum += data_in[j][rr][cc];
                     }
