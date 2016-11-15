@@ -75,63 +75,19 @@ int main(int argc, char **argv) {
 
     clparser(argc, argv, c);
 
-
     yr_idx = 0;
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
-        printf("%d %d\n", yr, yr_idx);
+        printf("%d\n", yr);
 
         ndays = 0;
         nday_idx = 0;
         for(mth_id = 0; mth_id < nmonths; mth_id++) {
 
-            // Dec, Jan Feb?
-            if (mth_id == 0) {
-                ndays += 31;
-                days_in_mth = 31;
-            } else if (mth_id == 1) {
-                ndays += 31;
-                days_in_mth = 31;
-            } else if (mth_id == 2) {
-                if (is_leap_year(yr+1)) {
-                    ndays += 29;
-                    days_in_mth = 29;
-                } else {
-                    ndays += 28;
-                    days_in_mth = 28;
-                }
-            }
+            days_in_mth = days_in_a_month(yr, mth_id, &ndays);
 
             for (day = 1; day <= days_in_mth; day++) {
 
-                if (day < 10) {
-	                sprintf(iday, "0%d", day);
-	            } else {
-	                sprintf(iday, "%d", day);
-                }
-
-                if (mth_id == 0) {
-                    sprintf(imth, "12");
-                } else if (mth_id == 1) {
-                    sprintf(imth, "01");
-                } else if (mth_id == 2) {
-                    sprintf(imth, "02");
-                }
-
-                if (mth_id == 0) {
-                    sprintf(infname,
-                            "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
-                            c->fdir, yr, imth, iday);
-                } else {
-                    sprintf(infname,
-                            "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
-                            c->fdir, yr+1, imth, iday);
-                }
-
-                // For now just read the same file again and again!
-                //sprintf(infname,
-                //        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc",
-                //        c->fdir);
-                //printf("%s\n", infname);
+                get_input_filename(c, day, mth_id, yr, iday, imth, infname);
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
 
                 nday_idx++;
@@ -139,54 +95,15 @@ int main(int argc, char **argv) {
             }  // Day in month loop
         } // mth loop
 
-        // Calculate the maximum n-day Tmax sum across this years Australian
-        // summer for every pixel
-        for (rr = 0; rr < NLAT; rr++) {
-            //printf("%d : %d    %d\n", rr, NLAT, ndays);
-            for (cc = 0; cc < NLON; cc++) {
-                offset = rr * NLON + cc;
-                max_5day_sum = -9999.9;
-                for (dd = 0; dd < ndays - c->window; dd+=c->window) {
-                    sum = 0.0;
-                    for (jj = dd; jj < dd+c->window; jj++) {
-                        value = data_in[jj][rr][cc];
-                        // ignore masked values
-                        if (value > -9000.0) {
-                            sum += data_in[jj][rr][cc];
-                        }
-                    }
-                    if (sum > max_5day_sum) {
-                        data_out[offset] = sum;
-                    }
-                } // end day loop
-
-                // Save running sum over all years so we can take the average
-                // later to calculate the max accross all years
-                if (data_out[offset] > 0.0) {
-                    data_out2[offset] += data_out[offset];
-                    cnt_all_yrs[offset]++;
-                }
-
-            } // end column loop
-        } // end row loop
+        calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2),
+                             &(*cnt_all_yrs));
 
         yr_idx++;
 
     } // yr loop
 
-    // Figure out maximum for each pixel across all years
-    yr_idx = 0;
-    for (yr = c->start_yr; yr < c->end_yr; yr++) {
-        for (rr = 0; rr < NLAT; rr++) {
-            for (cc = 0; cc < NLON; cc++) {
-                offset = rr * NLON + cc;
-                if (data_out2[offset] > 0.0) {
-                    data_out2[offset] /= (float)cnt_all_yrs[offset];
-                }
-            }
-        }
-        yr_idx++;
-    }
+    calculate_tmax_average_over_all_years(c, &(*data_out2), &(*cnt_all_yrs));
+
 
     // Write data to two netcdf files.
 
@@ -213,6 +130,129 @@ int main(int argc, char **argv) {
 
     return(EXIT_SUCCESS);
 
+}
+
+int days_in_a_month(int yr, int mth_id, int *ndays) {
+    // Figure out the days in a month and increment the number of number of days
+    // in a year counter
+
+    int days_in_mth;
+
+    if (mth_id == 0) {
+        *ndays += 31;
+        days_in_mth = 31;
+    } else if (mth_id == 1) {
+        *ndays += 31;
+        days_in_mth = 31;
+    } else if (mth_id == 2) {
+        if (is_leap_year(yr+1)) {
+            *ndays += 29;
+            days_in_mth = 29;
+        } else {
+            *ndays += 28;
+            days_in_mth = 28;
+        }
+    }
+
+    return (days_in_mth);
+}
+
+void get_input_filename(control *c, int day, int mth_id, int yr,
+                        char *iday, char *imth, char *infname) {
+
+    if (day < 10) {
+        sprintf(iday, "0%d", day);
+    } else {
+        sprintf(iday, "%d", day);
+    }
+
+    if (mth_id == 0) {
+        sprintf(imth, "12");
+    } else if (mth_id == 1) {
+        sprintf(imth, "01");
+    } else if (mth_id == 2) {
+        sprintf(imth, "02");
+    }
+
+    if (mth_id == 0) {
+        sprintf(infname, "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
+                c->fdir, yr, imth, iday);
+    } else {
+        sprintf(infname, "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
+                c->fdir, yr+1, imth, iday);
+    }
+    return;
+}
+
+void calculate_moving_sum(control *c, int ndays,
+                          float data_in[MAX_DAYS][NLAT][NLON],
+                          float *data_out, float *data_out2, int *cnt_all_yrs) {
+    // Calculate the maximum n-day Tmax sum across this years Australian
+    // summer for every pixel
+
+    int    rr, cc, i, j;
+    long   offset;
+    double max_5day_sum, sum;
+
+    for (rr = 0; rr < NLAT; rr++) {
+        for (cc = 0; cc < NLON; cc++) {
+
+            offset = rr * NLON + cc;
+            max_5day_sum = -9999.9;
+            for (i = 0; i < ndays - c->window; i++) {
+                sum = 0.0;
+                for (j = i; j < i + c->window; j++) {
+
+                    // ignore masked values
+                    //if (data_in[j][rr][cc] > -9000.0) {
+                    //    sum += data_in[j][rr][cc];
+                    //}
+
+                    // I think weird low values are getting through the filter
+                    // above. This is still a resonable assumption, i.e. Tmax>5
+                    if (data_in[j][rr][cc] > 5.0) {
+                        sum += data_in[j][rr][cc];
+                    }
+                }
+                if (sum > max_5day_sum) {
+                    data_out[offset] = sum;
+                    max_5day_sum = sum;
+                }
+            } // end day loop
+
+            // Save running sum over all years so we can take the average
+            // later to calculate the max accross all years
+            if (data_out[offset] > 0.0) {
+                data_out2[offset] += data_out[offset];
+                cnt_all_yrs[offset]++;
+            }
+
+
+        } // end column loop
+    } // end row loop
+
+    return;
+}
+
+void calculate_tmax_average_over_all_years(control *c, float *data,
+                                           int *count) {
+
+    int  yr_idx, yr, rr, cc;
+    long offset;
+
+    yr_idx = 0;
+    for (yr = c->start_yr; yr < c->end_yr; yr++) {
+        for (rr = 0; rr < NLAT; rr++) {
+            for (cc = 0; cc < NLON; cc++) {
+                offset = rr * NLON + cc;
+                if (data[offset] > 0.0) {
+                    data[offset] /= (float)count[offset];
+                }
+            }
+        }
+        yr_idx++;
+    }
+    return;
 }
 
 int is_leap_year(int year) {
