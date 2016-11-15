@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
 
     clparser(argc, argv, c);
 
+
     yr_idx = 0;
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
         printf("%d %d\n", yr, yr_idx);
@@ -130,7 +131,7 @@ int main(int argc, char **argv) {
                 //sprintf(infname,
                 //        "%s/eMAST_ANUClimate_day_tmax_v1m0_20000101.nc",
                 //        c->fdir);
-
+                //printf("%s\n", infname);
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
 
                 nday_idx++;
@@ -162,7 +163,7 @@ int main(int argc, char **argv) {
                 // Save running sum over all years so we can take the average
                 // later to calculate the max accross all years
                 if (data_out[offset] > 0.0) {
-                    data_out2[offset] += sum;
+                    data_out2[offset] += data_out[offset];
                     cnt_all_yrs[offset]++;
                 }
 
@@ -172,9 +173,6 @@ int main(int argc, char **argv) {
         yr_idx++;
 
     } // yr loop
-
-    offset = 2000 * NLON + 3000;
-    printf("%f\n", data_out[offset]);
 
     // Figure out maximum for each pixel across all years
     yr_idx = 0;
@@ -189,9 +187,6 @@ int main(int argc, char **argv) {
         }
         yr_idx++;
     }
-
-    offset = 2000 * NLON + 3000;
-    printf("%f\n", data_out2[offset]);
 
     // Write data to two netcdf files.
 
