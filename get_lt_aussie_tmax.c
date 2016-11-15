@@ -20,7 +20,7 @@
 int main(int argc, char **argv) {
 
     int   jj, rr, cc, status, nc_id, var_id, yr, ndays, days_in_mth;
-    int   mth_id, day, dd, nmonths = 3, nday_idx, yr_idx;
+    int   mth_id, day, dd, nmonths = 3, nday_idx;
     int   x_dimid, y_dimid;
     int   dimids[NDIMS];
     long  offset;
@@ -75,7 +75,6 @@ int main(int argc, char **argv) {
 
     clparser(argc, argv, c);
 
-    yr_idx = 0;
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
         printf("%d\n", yr);
 
@@ -97,8 +96,6 @@ int main(int argc, char **argv) {
 
         calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2),
                              &(*cnt_all_yrs));
-
-        yr_idx++;
 
     } // yr loop
 
@@ -237,21 +234,19 @@ void calculate_moving_sum(control *c, int ndays,
 void calculate_tmax_average_over_all_years(control *c, float *data,
                                            int *count) {
 
-    int  yr_idx, yr, rr, cc;
+    int  yr, rr, cc;
     long offset;
 
-    yr_idx = 0;
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
         for (rr = 0; rr < NLAT; rr++) {
             for (cc = 0; cc < NLON; cc++) {
                 offset = rr * NLON + cc;
                 if (data[offset] > 0.0) {
                     data[offset] /= (float)count[offset];
-                    printf("%d %d: %d", rr, cc, count[offset]);
+                    //printf("%d %d: %d\n", rr, cc, count[offset]);
                 }
             }
         }
-        yr_idx++;
     }
     return;
 }
@@ -319,7 +314,7 @@ void read_nc_file_into_array(control *c, char *infname, int day_idx,
 
 void write_nc_file(char *ofname, float out[NLAT][NLON]) {
 
-    int  status, nc_id, var_id, nday_idx, yr_idx;
+    int  status, nc_id, var_id, nday_idx;
     int  x_dimid, y_dimid;
     int  dimids[NDIMS];
 
