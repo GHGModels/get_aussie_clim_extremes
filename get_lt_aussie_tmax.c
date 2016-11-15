@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
     float       *data_out2 = NULL;
     int         *cnt_all_yrs = NULL;
 
+    // allocate some memory
     control *c;
     c = (control *)malloc(sizeof (control));
     if (c == NULL) {
@@ -75,22 +76,17 @@ int main(int argc, char **argv) {
 
     clparser(argc, argv, c);
 
+    // off we go
     for (yr = c->start_yr; yr < c->end_yr; yr++) {
         printf("%d\n", yr);
-
         ndays = 0;
         nday_idx = 0;
         for(mth_id = 0; mth_id < nmonths; mth_id++) {
-
             days_in_mth = days_in_a_month(yr, mth_id, &ndays);
-
             for (day = 1; day <= days_in_mth; day++) {
-
                 get_input_filename(c, day, mth_id, yr, iday, imth, infname);
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
-
                 nday_idx++;
-
             }  // Day in month loop
         } // mth loop
 
@@ -193,13 +189,11 @@ void calculate_moving_sum(control *c, int ndays,
 
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
-
             offset = rr * NLON + cc;
             for (i = 0; i < ndays - c->window; i++) {
                 sum = 0.0;
                 for (j = i; j < i + c->window; j++) {
-
-                    // ignore masked values, weird low values
+                    // ignore masked values, weird low values?
                     if (data_in[j][rr][cc] > 5.0) {
                         sum += data_in[j][rr][cc];
                     }
@@ -215,8 +209,6 @@ void calculate_moving_sum(control *c, int ndays,
                 data_out2[offset] += data_out[offset];
                 cnt_all_yrs[offset]++;
             }
-
-
         } // end column loop
     } // end row loop
 
