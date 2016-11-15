@@ -188,6 +188,7 @@ void calculate_moving_sum(control *c, int ndays,
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
+            yr_max = -999.9;
             for (i = 0; i < ndays - c->window; i++) {
                 sum = 0.0;
                 for (j = i; j < i + c->window; j++) {
@@ -199,12 +200,16 @@ void calculate_moving_sum(control *c, int ndays,
                 if (sum > data_out[offset]) {
                     data_out[offset] = sum;
                 }
+
+                if (sum > yr_max) {
+                    yr_max = sum;
+                }
             } // end day loop
 
             // Save running sum over all years so we can take the average
             // later to calculate the max accross all years
-            if (sum > 0.0) {
-                data_out2[offset] += sum;
+            if (yr_max > 0.0) {
+                data_out2[offset] += yr_max;
                 cnt_all_yrs[offset]++;
             }
         } // end column loop
