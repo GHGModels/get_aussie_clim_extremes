@@ -220,12 +220,6 @@ void calculate_tmax_average_over_all_years(control *c, float *data,
     int  yr, rr, cc;
     long offset;
 
-    //offset = 2000 * NLON + 3000;
-    //printf("%f %d %f\n", data[offset], count[offset],
-    //       data[offset]/ (float)count[offset]);
-    offset = 2000 * NLON + 3000;
-    printf("BEFORE AVG: %f %d\n", data[offset], count[offset]);
-
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
@@ -234,10 +228,6 @@ void calculate_tmax_average_over_all_years(control *c, float *data,
             }
         }
     }
-
-    offset = 2000 * NLON + 3000;
-    printf("END: %f\n", data[offset]);
-
 
     return;
 }
