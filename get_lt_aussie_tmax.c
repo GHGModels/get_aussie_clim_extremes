@@ -4,25 +4,24 @@
 //              get_lt_aussie_tmax
 //
 // DESCRIPTION:
-//              Using the eMAST Tmax data estimate the long-term N-days Tmax
-//              for each pixel across the continent. Where N might be 3, 4 or
-//              5 days, not decided yet.
+//              Using the eMAST Tmax data estimate: (i) the highest N-days Tmax
+//              for each pixel across the continent; and (ii) the average
+//              N-days Tmax across all years. Where N might be 3, 4 or
+//              5 days.
 //
 // AUTHOR:      Martin De Kauwe
 //
 // EMAIL:       mdekauwe@gmail.com
 //
-// DATE:        10th November, 2016
+// DATE:        15th November, 2016
 //
 
 #include "get_lt_aussie_tmax.h"
 
 int main(int argc, char **argv) {
 
-    int   jj, rr, cc, status, nc_id, var_id, yr, ndays, days_in_mth;
-    int   mth_id, day, dd, nmonths = 3, nday_idx;
-    int   x_dimid, y_dimid;
-    int   dimids[NDIMS];
+    int   rr, cc, yr, ndays, days_in_mth;
+    int   mth_id, day, nmonths = 3, nday_idx;
     long  offset;
     char  imth[3];
     char  iday[3];
