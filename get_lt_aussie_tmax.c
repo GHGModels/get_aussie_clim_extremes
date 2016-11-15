@@ -200,20 +200,20 @@ int main(int argc, char **argv) {
         }
     }
 
-    sprintf(ofname1, "test1.nc");
+    sprintf(ofname1, "5_day_Tmax_sum.nc");
     write_nc_file(ofname1, nc_data_out1);
 
-    sprintf(ofname2, "test2.nc");
+    sprintf(ofname2, "5_day_Tmax_avg.nc");
     write_nc_file(ofname2, nc_data_out2);
 
     free(data_out);
     free(data_out2);
     free(cnt_all_yrs);
+    free(c);
 
     return(EXIT_SUCCESS);
 
 }
-
 
 int is_leap_year(int year) {
 
@@ -225,7 +225,6 @@ int is_leap_year(int year) {
     return (leap);
 
 }
-
 
 void clparser(int argc, char **argv, control *c) {
     int i;
