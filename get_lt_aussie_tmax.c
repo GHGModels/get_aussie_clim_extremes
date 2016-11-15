@@ -222,8 +222,8 @@ void calculate_moving_sum(control *c, int ndays,
 
             // Save running sum over all years so we can take the average
             // later to calculate the max accross all years
-            if (data_out[offset] > 0.0) {
-                data_out2[offset] += data_out[offset];
+            if (max_5day_sum > 0.0) {
+                data_out2[offset] += max_5day_sum;
                 cnt_all_yrs[offset]++;
             }
 
@@ -247,6 +247,7 @@ void calculate_tmax_average_over_all_years(control *c, float *data,
                 offset = rr * NLON + cc;
                 if (data[offset] > 0.0) {
                     data[offset] /= (float)count[offset];
+                    printf("%d %d: %d", rr, cc, count[offset]);
                 }
             }
         }
