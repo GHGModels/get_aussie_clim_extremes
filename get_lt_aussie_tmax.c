@@ -203,8 +203,8 @@ void calculate_moving_sum(control *c, int ndays,
 
             // Save running sum over all years so we can take the average
             // later to calculate the max accross all years
-            if (data_out[offset] > 0.0) {
-                data_out2[offset] += data_out[offset];
+            if (sum > 0.0) {
+                data_out2[offset] += sum;
                 cnt_all_yrs[offset]++;
             }
         } // end column loop
