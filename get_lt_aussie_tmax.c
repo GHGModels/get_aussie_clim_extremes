@@ -92,11 +92,8 @@ int main(int argc, char **argv) {
 
         calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2),
                              &(*cnt_all_yrs));
-
     } // yr loop
-
     calculate_tmax_average_over_all_years(c, &(*data_out2), &(*cnt_all_yrs));
-
 
     // Write data to two netcdf files.
 
