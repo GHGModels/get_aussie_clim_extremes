@@ -182,9 +182,6 @@ void calculate_moving_sum(control *c, int ndays,
     long   offset;
     float  sum, yr_max;
 
-    offset = 2000 * NLON + 3000;
-    printf("%f %f\n", data_out[offset], data_out2[offset]);
-
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
@@ -197,24 +194,14 @@ void calculate_moving_sum(control *c, int ndays,
                         sum += data_in[j][rr][cc];
                     }
                 }
-
-
-
                 if (sum > data_out[offset]) {
                     data_out[offset] = sum;
                 }
                 if (sum > yr_max) {
                     yr_max = sum;
                 }
-                if (offset == 2000 * NLON + 3000) {
-                    printf("[*] %f %f %f\n", sum, data_out[offset], yr_max);
-                }
-
             } // end day loop
 
-            if (offset == 2000 * NLON + 3000) {
-                printf("[+] %f\n", yr_max);
-            }
             // Save running sum over all years so we can take the average
             // later to calculate the max accross all years
             if (yr_max > 0.0) {
@@ -223,10 +210,6 @@ void calculate_moving_sum(control *c, int ndays,
             }
         } // end column loop
     } // end row loop
-
-    offset = 2000 * NLON + 3000;
-    printf("%f %f %d\n", data_out[offset], data_out2[offset], cnt_all_yrs[offset]);
-
 
     return;
 }
@@ -247,21 +230,11 @@ void calculate_tmax_average_over_all_years(control *c, float *data,
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
             if (data[offset] > 0.0) {
-
-                if (offset == 2000 * NLON + 3000) {
-                    printf("Before %f %f\n", data[offset], (float)count[offset]);
-                }
                 data[offset] /= (float)count[offset];
-
-                if (offset == 2000 * NLON + 3000) {
-                    printf("After %f\n", data[offset]);
-                }
-
-                //printf("%d %d: %d\n", rr, cc, count[offset]);
             }
         }
     }
-    
+
     offset = 2000 * NLON + 3000;
     printf("END: %f\n", data[offset]);
 
