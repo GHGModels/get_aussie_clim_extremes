@@ -8,7 +8,8 @@ ARCH     =  x86_64
 INCLS    = -I./include
 LIBS     = -L/opt/local/lib -lm -lnetcdf
 CC       =  gcc
-PROGRAM  =  get_lt_aussie_tmax
+#PROGRAM  =  get_lt_aussie_tmax
+PROGRAM  =  get_lt_aussie_tmin
 SOURCES  =  $(PROGRAM).c
 OBJECTS = $(SOURCES:.c=.o)
 RM       =  rm -f

@@ -42,6 +42,6 @@ void get_input_filename(control *, int, int, int, char *, char *, char *);
 void calculate_moving_sum(control *, int ,
                           float data_in[MAX_DAYS][NLAT][NLON],
                           float *, float *, int *);
-void calculate_tmax_average_over_all_years(control *, float *, int *);
+void calculate_tmin_average_over_all_years(control *, float *, int *);
 
 #endif /* GET_LT_AUSSIE_TMAX_H */

@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
         calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2),
                              &(*cnt_all_yrs));
     } // yr loop
-    calculate_tmax_average_over_all_years(c, &(*data_out2), &(*cnt_all_yrs));
+    calculate_tmin_average_over_all_years(c, &(*data_out2), &(*cnt_all_yrs));
 
     // Write data to two netcdf files.
 
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
     sprintf(ofname1, "%d_day_Tmin_sum.nc", c->window);
     write_nc_file(ofname1, nc_data_out1);
 
-    sprintf(ofname2, "%d_day_Tmin_avg.nc", , c->window);
+    sprintf(ofname2, "%d_day_Tmin_avg.nc", c->window);
     write_nc_file(ofname2, nc_data_out2);
 
     free(data_out);
@@ -163,10 +163,10 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
     }
 
     if (mth_id == 0) {
-        sprintf(infname, "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
+        sprintf(infname, "%s/eMAST_ANUClimate_day_tmin_v1m0_%d%s%s.nc",
                 c->fdir, yr, imth, iday);
     } else {
-        sprintf(infname, "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
+        sprintf(infname, "%s/eMAST_ANUClimate_day_tmin_v1m0_%d%s%s.nc",
                 c->fdir, yr+1, imth, iday);
     }
     return;
@@ -175,17 +175,17 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
 void calculate_moving_sum(control *c, int ndays,
                           float data_in[MAX_DAYS][NLAT][NLON],
                           float *data_out, float *data_out2, int *cnt_all_yrs) {
-    // Calculate the maximum n-day Tmax sum across this years Australian
+    // Calculate the maximum n-day Tmin sum across this years Australian
     // summer for every pixel
 
     int    rr, cc, i, j;
     long   offset;
-    float  sum, yr_max;
+    float  sum, yr_min;
 
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
-            yr_max = -999.9;
+            yr_min = 999.9;
             for (i = 0; i < ndays - c->window; i++) {
                 sum = 0.0;
                 for (j = i; j < i + c->window; j++) {
@@ -197,15 +197,15 @@ void calculate_moving_sum(control *c, int ndays,
                 if (sum > data_out[offset]) {
                     data_out[offset] = sum;
                 }
-                if (sum > yr_max) {
-                    yr_max = sum;
+                if (sum < yr_min) {
+                    yr_min = sum;
                 }
             } // end day loop
 
             // Save running sum over all years so we can take the average
-            // later to calculate the max accross all years
-            if (yr_max > 0.0) {
-                data_out2[offset] += yr_max;
+            // later to calculate the min accross all years
+            if (yr_min > 0.0) {
+                data_out2[offset] += yr_min;
                 cnt_all_yrs[offset]++;
             }
         } // end column loop
@@ -214,7 +214,7 @@ void calculate_moving_sum(control *c, int ndays,
     return;
 }
 
-void calculate_tmax_average_over_all_years(control *c, float *data,
+void calculate_tmin_average_over_all_years(control *c, float *data,
                                            int *count) {
 
     int  yr, rr, cc;
