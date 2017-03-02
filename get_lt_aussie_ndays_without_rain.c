@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
             }  // Day in month loop
         } // mth loop
 
-        calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2));
+        calculate_dry_spell(c, ndays, data_in, &(*data_out), &(*data_out2));
     } // yr loop
 
     // Write data to two netcdf files.
@@ -164,7 +164,7 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
     return;
 }
 
-void calculate_moving_sum(control *c, int ndays,
+void calculate_dry_spell(control *c, int ndays,
                           float data_in[MAX_DAYS][NLAT][NLON],
                           int *data_out, int *data_out2) {
     // Calculate the longest n-day PPT sum across this years Australian

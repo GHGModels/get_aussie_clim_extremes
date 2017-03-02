@@ -39,7 +39,7 @@ void write_nc_file(char *,  float [NLAT][NLON]);
 int  days_in_a_month(int, int, int *);
 void get_input_filename(control *, int, int, int, char *, char *, char *);
 
-void calculate_moving_sum(control *, int ,
+void calculate_dry_spell(control *, int ,
                           float data_in[MAX_DAYS][NLAT][NLON],
                           int *, int *);
 
