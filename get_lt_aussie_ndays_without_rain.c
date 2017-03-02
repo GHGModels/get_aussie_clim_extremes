@@ -177,33 +177,39 @@ void calculate_moving_sum(control *c, int ndays,
     // summer for every pixel
 
     int    rr, cc, i, j;
-    long   offset;
-    float  sum, yr_max;
+    long   offset, count, yr_count;
+    float  yr_max;
 
     for (rr = 0; rr < NLAT; rr++) {
         for (cc = 0; cc < NLON; cc++) {
             offset = rr * NLON + cc;
-            yr_max = -999.9;
-            for (i = 0; i < ndays - c->window; i++) {
-                sum = 0.0;
-                for (j = i; j < i + c->window; j++) {
-                    // ignore masked values, weird low values?
-                    if (data_in[j][rr][cc] > 5.0) {
-                        sum += data_in[j][rr][cc];
-                    }
+
+            count = 0;
+            yr_count = 0;
+            for (i = 0; i < ndays ; i++) {
+
+                // Effective rainfall, values less than 2 mm
+                if (data_in[i][rr][cc] < 2.0) {
+                    count++;
+                } else if (data_in[i][rr][cc] > 2.0) {
+                    // reset count if it rained
+                    count = 0;
                 }
-                if (sum > data_out[offset]) {
-                    data_out[offset] = sum;
+
+                if (count > yr_count) {
+                    yr_count = count;
                 }
-                if (sum > yr_max) {
-                    yr_max = sum;
+
+                if (yr_count > data_out[offset]) {
+                    data_out[offset] = (float)yr_count;
                 }
+
             } // end day loop
 
             // Save running sum over all years so we can take the average
             // later to calculate the max accross all years
-            if (yr_max > 0.0) {
-                data_out2[offset] += yr_max;
+            if (yr_count > 0.0) {
+                data_out2[offset] += (float)yr_count;
                 cnt_all_yrs[offset]++;
             }
         } // end column loop
