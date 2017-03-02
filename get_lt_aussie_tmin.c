@@ -1,22 +1,22 @@
 //
 //
 // PROGRAM:
-//              get_lt_aussie_tmax
+//              get_lt_aussie_tmin
 //
 // DESCRIPTION:
-//              Using the eMAST Tmax data estimate: (i) the highest N-days Tmax
+//              Using the eMAST Tmin data estimate: (i) the lowest N-days Tmin
 //              for each pixel across the continent; and (ii) the average
-//              N-days Tmax across all years. Where N might be 3, 4 or
+//              N-days Tmin across all years. Where N might be 3, 4 or
 //              5 days.
 //
 // AUTHOR:      Martin De Kauwe
 //
 // EMAIL:       mdekauwe@gmail.com
 //
-// DATE:        15th November, 2016
+// DATE:        2nd March, 2017
 //
 
-#include "get_lt_aussie_tmax.h"
+#include "get_lt_aussie_tmin.h"
 
 int main(int argc, char **argv) {
 
@@ -105,10 +105,10 @@ int main(int argc, char **argv) {
         }
     }
 
-    sprintf(ofname1, "%d_day_Tmax_sum.nc", c->window);
+    sprintf(ofname1, "%d_day_Tmin_sum.nc", c->window);
     write_nc_file(ofname1, nc_data_out1);
 
-    sprintf(ofname2, "%d_day_Tmax_avg.nc", c->window);
+    sprintf(ofname2, "%d_day_Tmin_avg.nc", , c->window);
     write_nc_file(ofname2, nc_data_out2);
 
     free(data_out);
