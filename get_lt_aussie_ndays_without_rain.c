@@ -36,9 +36,9 @@ int main(int argc, char **argv) {
     static float data_in[MAX_DAYS][NLAT][NLON];
     static float nc_data_out1[NLAT][NLON];
     static float nc_data_out2[NLAT][NLON];
-    float       *data_out = NULL;
-    float       *data_out2 = NULL;
-    int         *cnt_all_yrs = NULL;
+    int         *data_out = NULL;
+    int         *data_out2 = NULL;
+
 
     // allocate some memory
     control *c;
@@ -48,20 +48,16 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if ((data_out = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
+    if ((data_out = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
         fprintf(stderr, "Error allocating space for data_out array\n");
         exit(EXIT_FAILURE);
     }
 
-    if ((data_out2 = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
+    if ((data_out2 = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
         fprintf(stderr, "Error allocating space for data_out2 array\n");
         exit(EXIT_FAILURE);
     }
 
-    if ((cnt_all_yrs = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
-        fprintf(stderr, "Error allocating space for cnt_all_yrs array\n");
-        exit(EXIT_FAILURE);
-    }
 
     // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
@@ -86,10 +82,8 @@ int main(int argc, char **argv) {
             }  // Day in month loop
         } // mth loop
 
-        calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2),
-                             &(*cnt_all_yrs));
+        calculate_moving_sum(c, ndays, data_in, &(*data_out), &(*data_out2));
     } // yr loop
-    calculate_tmax_average_over_all_years(c, &(*data_out2), &(*cnt_all_yrs));
 
     // Write data to two netcdf files.
 
@@ -111,7 +105,7 @@ int main(int argc, char **argv) {
 
     free(data_out);
     free(data_out2);
-    free(cnt_all_yrs);
+
     free(c);
 
     return(EXIT_SUCCESS);
@@ -172,7 +166,7 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
 
 void calculate_moving_sum(control *c, int ndays,
                           float data_in[MAX_DAYS][NLAT][NLON],
-                          float *data_out, float *data_out2, int *cnt_all_yrs) {
+                          int *data_out, int *data_out2) {
     // Calculate the longest n-day PPT sum across this years Australian
     // summer for every pixel
 
@@ -201,16 +195,14 @@ void calculate_moving_sum(control *c, int ndays,
                 }
 
                 if (yr_count > data_out[offset]) {
-                    data_out[offset] = (float)yr_count;
+                    data_out[offset] = yr_count;
                 }
 
             } // end day loop
 
-            // Save running sum over all years so we can take the average
-            // later to calculate the max accross all years
-            if (yr_count > 0.0) {
-                data_out2[offset] += (float)yr_count;
-                cnt_all_yrs[offset]++;
+            // Save highest year dry spell over all years
+            if (yr_count > data_out2[offset]) {
+                data_out2[offset] = yr_count;
             }
         } // end column loop
     } // end row loop
@@ -218,23 +210,6 @@ void calculate_moving_sum(control *c, int ndays,
     return;
 }
 
-void calculate_tmax_average_over_all_years(control *c, float *data,
-                                           int *count) {
-
-    int  yr, rr, cc;
-    long offset;
-
-    for (rr = 0; rr < NLAT; rr++) {
-        for (cc = 0; cc < NLON; cc++) {
-            offset = rr * NLON + cc;
-            if (data[offset] > 0.0) {
-                data[offset] /= (float)count[offset];
-            }
-        }
-    }
-
-    return;
-}
 
 int is_leap_year(int year) {
 
