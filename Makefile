@@ -9,7 +9,8 @@ INCLS    = -I./include
 LIBS     = -L/opt/local/lib -lm -lnetcdf
 CC       =  gcc
 #PROGRAM  =  get_lt_aussie_tmax
-PROGRAM  =  get_lt_aussie_tmin
+#PROGRAM  =  get_lt_aussie_tmin
+PROGRAM  =  get_lt_aussie_ndays_without_rain
 SOURCES  =  $(PROGRAM).c
 OBJECTS = $(SOURCES:.c=.o)
 RM       =  rm -f

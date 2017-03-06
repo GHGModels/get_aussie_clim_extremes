@@ -36,9 +36,10 @@ int main(int argc, char **argv) {
     static float data_in[MAX_DAYS][NLAT][NLON];
     static float nc_data_out1[NLAT][NLON];
     static float nc_data_out2[NLAT][NLON];
-    int         *data_out = NULL;
-    int         *data_out2 = NULL;
-
+    float       *data_out = NULL;
+    float       *data_out2 = NULL;
+    int         *cnt_all_yrs = NULL;
+    int         *cnt_all_yrs2 = NULL;
 
     // allocate some memory
     control *c;
@@ -48,16 +49,25 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if ((data_out = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
+    if ((data_out = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
         fprintf(stderr, "Error allocating space for data_out array\n");
         exit(EXIT_FAILURE);
     }
 
-    if ((data_out2 = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
+    if ((data_out2 = (float *)calloc(NLAT*NLON, sizeof(float))) == NULL) {
         fprintf(stderr, "Error allocating space for data_out2 array\n");
         exit(EXIT_FAILURE);
     }
 
+    if ((cnt_all_yrs = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
+        fprintf(stderr, "Error allocating space for cnt_all_yrs array\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((cnt_all_yrs2 = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
+        fprintf(stderr, "Error allocating space for cnt_all_yrs2 array\n");
+        exit(EXIT_FAILURE);
+    }
 
     // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
@@ -82,8 +92,11 @@ int main(int argc, char **argv) {
             }  // Day in month loop
         } // mth loop
 
-        calculate_dry_spell(c, ndays, data_in, &(*data_out), &(*data_out2));
+        calculate_dry_spells(c, ndays, data_in, &(*data_out), &(*data_out2),
+                             &(*cnt_all_yrs), &(*cnt_all_yrs2));
     } // yr loop
+    calculate_avg_dry_spells_over_all_years(c, &(*data_out), &(*data_out2),
+                                            &(*cnt_all_yrs), &(*cnt_all_yrs2));
 
     // Write data to two netcdf files.
 
@@ -97,15 +110,16 @@ int main(int argc, char **argv) {
         }
     }
 
-    sprintf(ofname1, "%d_day_Tmax_sum.nc", c->window);
+    sprintf(ofname1, "%d_avg_dry_spell.nc", c->window);
     write_nc_file(ofname1, nc_data_out1);
 
-    sprintf(ofname2, "%d_day_Tmax_avg.nc", c->window);
+    sprintf(ofname2, "%d_longest_dry_spell.nc", c->window);
     write_nc_file(ofname2, nc_data_out2);
 
     free(data_out);
     free(data_out2);
-
+    free(cnt_all_yrs);
+    free(cnt_all_yrs2);
     free(c);
 
     return(EXIT_SUCCESS);
@@ -164,11 +178,12 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
     return;
 }
 
-void calculate_dry_spell(control *c, int ndays,
+void calculate_dry_spells(control *c, int ndays,
                           float data_in[MAX_DAYS][NLAT][NLON],
-                          int *data_out, int *data_out2) {
-    // Calculate the longest n-day PPT sum across this years Australian
-    // summer for every pixel
+                          float *data_out, float *data_out2, int *cnt_all_yrs,
+                          int *cnt_all_yrs2) {
+    // Calculate the longest dry spell in a year and keep a record of all of
+    // the dry spells to figure out the average
 
     int    rr, cc, i, j;
     long   offset, count, yr_count;
@@ -186,7 +201,9 @@ void calculate_dry_spell(control *c, int ndays,
                 if (data_in[i][rr][cc] < 2.0) {
                     count++;
                 } else if (data_in[i][rr][cc] > 2.0) {
-                    // reset count if it rained
+                    // Need to save dry spells to figure average dry spell
+                    data_out[offset] += (float)count;
+                    cnt_all_yrs[offset]++;
                     count = 0;
                 }
 
@@ -194,22 +211,42 @@ void calculate_dry_spell(control *c, int ndays,
                     yr_count = count;
                 }
 
-                if (yr_count > data_out[offset]) {
-                    data_out[offset] = yr_count;
-                }
-
             } // end day loop
 
-            // Save highest year dry spell over all years
-            if (yr_count > data_out2[offset]) {
-                data_out2[offset] = yr_count;
+            // Save longest dry spell in a year
+            if (yr_count > 0.0) {
+                data_out2[offset] += (float)yr_count;
+                cnt_all_yrs2[offset]++;
             }
+
         } // end column loop
     } // end row loop
 
     return;
 }
 
+void calculate_avg_dry_spells_over_all_years(control *c, float *data,
+                                             float *data2, int *count,
+                                             int *count2) {
+
+    int  yr, rr, cc;
+    long offset;
+
+    for (rr = 0; rr < NLAT; rr++) {
+        for (cc = 0; cc < NLON; cc++) {
+            offset = rr * NLON + cc;
+            if (data[offset] > 0.0) {
+                data[offset] /= (float)count[offset];
+            }
+
+            if (data2[offset] > 0.0) {
+                data2[offset] /= (float)count2[offset];
+            }
+        }
+    }
+
+    return;
+}
 
 int is_leap_year(int year) {
 

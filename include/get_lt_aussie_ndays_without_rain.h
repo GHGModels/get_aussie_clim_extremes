@@ -39,8 +39,10 @@ void write_nc_file(char *,  float [NLAT][NLON]);
 int  days_in_a_month(int, int, int *);
 void get_input_filename(control *, int, int, int, char *, char *, char *);
 
-void calculate_dry_spell(control *, int ,
+void calculate_dry_spells(control *, int ,
                           float data_in[MAX_DAYS][NLAT][NLON],
-                          int *, int *);
+                          float *, float *, int *, int*);
+void calculate_avg_dry_spells_over_all_years(control *, float *, float *,
+                                             int *, int *);
 
 #endif /* GET_LT_AUSSIE_TMAX_H */
