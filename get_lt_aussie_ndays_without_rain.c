@@ -4,14 +4,14 @@
 //              get_lt_aussie_ndays_without_rain
 //
 // DESCRIPTION:
-//              Using the eMAST PPT data estimate: (i) the number of days
-//              without PPT for each pixel across the continent
+//              Using the eMAST PPT data estimate: (i) the average dry spell
+//              per pixel and (ii) the average longest dry spell in a year
 //
 // AUTHOR:      Martin De Kauwe
 //
 // EMAIL:       mdekauwe@gmail.com
 //
-// DATE:        2nd March, 2017
+// DATE:        6th March, 2017
 //
 
 #include "get_lt_aussie_ndays_without_rain.h"
@@ -201,19 +201,21 @@ void calculate_dry_spells(control *c, int ndays,
                 if (data_in[i][rr][cc] < 2.0) {
                     count++;
                 } else if (data_in[i][rr][cc] > 2.0) {
-                    // Need to save dry spells to figure average dry spell
+                    // Need to save dry spells to figure average dry spells
+                    // later across all years
                     data_out[offset] += (float)count;
                     cnt_all_yrs[offset]++;
                     count = 0;
                 }
 
+                // Figure out the longest dry spell within a year
                 if (count > yr_count) {
                     yr_count = count;
                 }
 
             } // end day loop
 
-            // Save longest dry spell in a year
+            // Save longest dry spell in a year, we will take the average later
             if (yr_count > 0.0) {
                 data_out2[offset] += (float)yr_count;
                 cnt_all_yrs2[offset]++;
