@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 
     // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
-    strcpy(c->var_name, "air_temperature");
+    strcpy(c->var_name, "lwe_thickness_of_precipitation_amount");
     c->window = 5;
     c->start_yr = 1970;
     c->end_yr = 1971;
@@ -169,10 +169,10 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
     }
 
     if (mth_id == 0) {
-        sprintf(infname, "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
+        sprintf(infname, "%s/eMAST_ANUClimate_day_prec_v1m0_%d%s%s.nc",
                 c->fdir, yr, imth, iday);
     } else {
-        sprintf(infname, "%s/eMAST_ANUClimate_day_tmax_v1m0_%d%s%s.nc",
+        sprintf(infname, "%s/eMAST_ANUClimate_day_prec_v1m0_%d%s%s.nc",
                 c->fdir, yr+1, imth, iday);
     }
     return;
@@ -332,7 +332,7 @@ void write_nc_file(char *ofname, float out[NLAT][NLON]) {
     dimids[0] = y_dimid;
     dimids[1] = x_dimid;
 
-    if ((status = nc_def_var(nc_id, "Tmax", NC_FLOAT, NDIMS,
+    if ((status = nc_def_var(nc_id, "PPT", NC_FLOAT, NDIMS,
                              dimids, &var_id))) {
         ERR(status);
     }
