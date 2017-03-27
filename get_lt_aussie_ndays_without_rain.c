@@ -13,6 +13,8 @@
 //
 // DATE:        6th March, 2017
 //
+// get_lt_aussie_ndays_without_rain -fd /Volumes/LadysmithBlackMambazo/data/emast/daily/prec/summer -sy 2001 -ey 2010
+// get_lt_aussie_ndays_without_rain -fd /Volumes/LadysmithBlackMambazo/data/emast/daily/prec/summer -sy 1970 -ey 2001
 
 #include "get_lt_aussie_ndays_without_rain.h"
 
@@ -110,10 +112,10 @@ int main(int argc, char **argv) {
         }
     }
 
-    sprintf(ofname1, "%d_avg_dry_spell.nc", c->window);
+    sprintf(ofname1, "average_dry_spell.nc");
     write_nc_file(ofname1, nc_data_out1);
 
-    sprintf(ofname2, "%d_longest_dry_spell.nc", c->window);
+    sprintf(ofname2, "longest_dry_spell.nc");
     write_nc_file(ofname2, nc_data_out2);
 
     free(data_out);
@@ -198,9 +200,10 @@ void calculate_dry_spells(control *c, int ndays,
             for (i = 0; i < ndays ; i++) {
 
                 // Effective rainfall, values less than 2 mm
-                if (data_in[i][rr][cc] < 2.0) {
+                if ( (data_in[i][rr][cc] < 0.2) &&
+                     (data_in[i][rr][cc] > -500.0) ) {
                     count++;
-                } else if (data_in[i][rr][cc] > 2.0) {
+                } else if (data_in[i][rr][cc] > 0.2) {
                     // Need to save dry spells to figure average dry spells
                     // later across all years
                     data_out[offset] += (float)count;
@@ -215,10 +218,12 @@ void calculate_dry_spells(control *c, int ndays,
 
             } // end day loop
 
-            // Save longest dry spell in a year, we will take the average later
+            // Save longest dry spell in a year, check if it is the longest
+            // we've had?
             if (yr_count > 0.0) {
-                data_out2[offset] += (float)yr_count;
-                cnt_all_yrs2[offset]++;
+                if ((float)yr_count > data_out2[offset]) {
+                    data_out2[offset] = (float)yr_count;
+                }
             }
 
         } // end column loop
@@ -241,9 +246,8 @@ void calculate_avg_dry_spells_over_all_years(control *c, float *data,
                 data[offset] /= (float)count[offset];
             }
 
-            if (data2[offset] > 0.0) {
-                data2[offset] /= (float)count2[offset];
-            }
+            //if (data2[offset] > 0.0) {
+            //    data2[offset] /= (float)count2[offset];
         }
     }
 
