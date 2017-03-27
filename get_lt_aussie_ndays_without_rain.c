@@ -41,7 +41,6 @@ int main(int argc, char **argv) {
     float       *data_out = NULL;
     float       *data_out2 = NULL;
     int         *cnt_all_yrs = NULL;
-    int         *cnt_all_yrs2 = NULL;
 
     // allocate some memory
     control *c;
@@ -66,15 +65,9 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if ((cnt_all_yrs2 = (int *)calloc(NLAT*NLON, sizeof(int))) == NULL) {
-        fprintf(stderr, "Error allocating space for cnt_all_yrs2 array\n");
-        exit(EXIT_FAILURE);
-    }
-
     // Initial values, these can be changed on the cmd line
     strcpy(c->fdir, "/Users/mdekauwe/Downloads/emast_data");
     strcpy(c->var_name, "lwe_thickness_of_precipitation_amount");
-    c->window = 5;
     c->start_yr = 1970;
     c->end_yr = 1971;
 
@@ -95,10 +88,9 @@ int main(int argc, char **argv) {
         } // mth loop
 
         calculate_dry_spells(c, ndays, data_in, &(*data_out), &(*data_out2),
-                             &(*cnt_all_yrs), &(*cnt_all_yrs2));
+                             &(*cnt_all_yrs));
     } // yr loop
-    calculate_avg_dry_spells_over_all_years(c, &(*data_out), &(*data_out2),
-                                            &(*cnt_all_yrs), &(*cnt_all_yrs2));
+    calculate_avg_dry_spells_over_all_years(c, &(*data_out), &(*cnt_all_yrs) );
 
     // Write data to two netcdf files.
 
@@ -121,7 +113,6 @@ int main(int argc, char **argv) {
     free(data_out);
     free(data_out2);
     free(cnt_all_yrs);
-    free(cnt_all_yrs2);
     free(c);
 
     return(EXIT_SUCCESS);
@@ -182,8 +173,7 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
 
 void calculate_dry_spells(control *c, int ndays,
                           float data_in[MAX_DAYS][NLAT][NLON],
-                          float *data_out, float *data_out2, int *cnt_all_yrs,
-                          int *cnt_all_yrs2) {
+                          float *data_out, float *data_out2, int *cnt_all_yrs) {
     // Calculate the longest dry spell in a year and keep a record of all of
     // the dry spells to figure out the average
 
@@ -199,7 +189,7 @@ void calculate_dry_spells(control *c, int ndays,
             yr_count = 0;
             for (i = 0; i < ndays ; i++) {
 
-                // Effective rainfall, values less than 2 mm
+                // Effective rainfall, values less than 0.2 mm
                 if ( (data_in[i][rr][cc] < 0.2) &&
                      (data_in[i][rr][cc] > -500.0) ) {
                     count++;
@@ -233,8 +223,7 @@ void calculate_dry_spells(control *c, int ndays,
 }
 
 void calculate_avg_dry_spells_over_all_years(control *c, float *data,
-                                             float *data2, int *count,
-                                             int *count2) {
+                                             int *count) {
 
     int  yr, rr, cc;
     long offset;
@@ -245,9 +234,6 @@ void calculate_avg_dry_spells_over_all_years(control *c, float *data,
             if (data[offset] > 0.0) {
                 data[offset] /= (float)count[offset];
             }
-
-            //if (data2[offset] > 0.0) {
-            //    data2[offset] /= (float)count2[offset];
         }
     }
 
@@ -274,8 +260,6 @@ void clparser(int argc, char **argv, control *c) {
                 strcpy(c->fdir, argv[++i]);
             } else if (!strncasecmp(argv[i], "-vn", 3)) {
                 strcpy(c->var_name, argv[++i]);
-            } else if (!strncasecmp(argv[i], "-w", 2)) {
-                c->window = atoi(argv[++i]);
             } else if (!strncasecmp(argv[i], "-sy", 3)) {
                 c->start_yr = atoi(argv[++i]);
             } else if (!strncasecmp(argv[i], "-ey", 3)) {
