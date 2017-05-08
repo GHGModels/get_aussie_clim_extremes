@@ -2,15 +2,15 @@
 USER    := $(shell whoami)
 HOME     = /Users/$(USER)
 #WHERE    = $(HOME)/Desktop/emast_Tmax
-WHERE    = /Volumes/Seagate/emast_Tmax
+WHERE    = /Volumes/Seagate/emast_Tmin
 CFLAGS   =  -O3#-g -Wall
 ARCH     =  x86_64
 INCLS    = -I./include
 LIBS     = -L/opt/local/lib -lm -lnetcdf
 CC       =  gcc
 #PROGRAM  =  get_lt_aussie_tmax
-#PROGRAM  =  get_lt_aussie_tmin
-PROGRAM  =  get_lt_aussie_ndays_without_rain
+PROGRAM  =  get_lt_aussie_tmin
+#PROGRAM  =  get_lt_aussie_ndays_without_rain
 SOURCES  =  $(PROGRAM).c
 OBJECTS = $(SOURCES:.c=.o)
 RM       =  rm -f
