@@ -12,7 +12,7 @@
 #define NTIM 1
 #define NLAT 3474
 #define NLON 4110
-#define MAX_DAYS 91
+#define MAX_DAYS 92
 #define NYRS 42
 #define NDIMS 2
 

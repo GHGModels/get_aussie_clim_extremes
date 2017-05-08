@@ -81,9 +81,7 @@ int main(int argc, char **argv) {
         nday_idx = 0;
         for(mth_id = 0; mth_id < nmonths; mth_id++) {
             days_in_mth = days_in_a_month(yr, mth_id, &ndays);
-            printf("%d \n",days_in_mth);
             for (day = 1; day <= days_in_mth; day++) {
-                printf("%d %d %d\n", yr, mth_id, day);
                 get_input_filename(c, day, mth_id, yr, iday, imth, infname);
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
                 nday_idx++;
@@ -161,6 +159,7 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
 
     sprintf(infname, "%s/eMAST_ANUClimate_day_tmin_v1m0_%d%s%s.nc",
             c->fdir, yr, imth, iday);
+
     return;
 }
 
