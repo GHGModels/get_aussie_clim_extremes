@@ -81,7 +81,9 @@ int main(int argc, char **argv) {
         nday_idx = 0;
         for(mth_id = 0; mth_id < nmonths; mth_id++) {
             days_in_mth = days_in_a_month(yr, mth_id, &ndays);
+            printf("%d \n",days_in_mth);
             for (day = 1; day <= days_in_mth; day++) {
+                printf("%d %d %d\n", yr, mth_id, day);
                 get_input_filename(c, day, mth_id, yr, iday, imth, infname);
                 read_nc_file_into_array(c, infname, nday_idx, data_in);
                 nday_idx++;
@@ -133,8 +135,8 @@ int days_in_a_month(int yr, int mth_id, int *ndays) {
         *ndays += 31;
         days_in_mth = 31;
     } else if (mth_id == 2) {
-        *ndays += 30;
-        days_in_mth = 30;
+        *ndays += 31;
+        days_in_mth = 31;
     }
 
     return (days_in_mth);
@@ -157,13 +159,8 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
         sprintf(imth, "08");
     }
 
-    if (mth_id == 0) {
-        sprintf(infname, "%s/eMAST_ANUClimate_day_tmin_v1m0_%d%s%s.nc",
-                c->fdir, yr, imth, iday);
-    } else {
-        sprintf(infname, "%s/eMAST_ANUClimate_day_tmin_v1m0_%d%s%s.nc",
-                c->fdir, yr+1, imth, iday);
-    }
+    sprintf(infname, "%s/eMAST_ANUClimate_day_tmin_v1m0_%d%s%s.nc",
+            c->fdir, yr, imth, iday);
     return;
 }
 
