@@ -127,19 +127,14 @@ int days_in_a_month(int yr, int mth_id, int *ndays) {
     int days_in_mth;
 
     if (mth_id == 0) {
-        *ndays += 31;
-        days_in_mth = 31;
+        *ndays += 30;
+        days_in_mth = 30;
     } else if (mth_id == 1) {
         *ndays += 31;
         days_in_mth = 31;
     } else if (mth_id == 2) {
-        if (is_leap_year(yr+1)) {
-            *ndays += 29;
-            days_in_mth = 29;
-        } else {
-            *ndays += 28;
-            days_in_mth = 28;
-        }
+        *ndays += 30;
+        days_in_mth = 30;
     }
 
     return (days_in_mth);
@@ -155,11 +150,11 @@ void get_input_filename(control *c, int day, int mth_id, int yr,
     }
 
     if (mth_id == 0) {
-        sprintf(imth, "12");
+        sprintf(imth, "06");
     } else if (mth_id == 1) {
-        sprintf(imth, "01");
+        sprintf(imth, "07");
     } else if (mth_id == 2) {
-        sprintf(imth, "02");
+        sprintf(imth, "08");
     }
 
     if (mth_id == 0) {
@@ -176,7 +171,7 @@ void calculate_moving_sum(control *c, int ndays,
                           float data_in[MAX_DAYS][NLAT][NLON],
                           float *data_out, float *data_out2, int *cnt_all_yrs) {
     // Calculate the maximum n-day Tmin sum across this years Australian
-    // summer for every pixel
+    // winter for every pixel
 
     int    rr, cc, i, j;
     long   offset;
